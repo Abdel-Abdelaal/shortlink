@@ -21,7 +21,7 @@ Then open http://127.0.0.1:8000/health or the interactive docs at http://127.0.0
 ## How changes get in
 
 `main` is protected: no direct pushes, no force pushes, and every change goes
-through a pull request with passing checks. See [CONTRIBUTING.md](CONTRIBUTING.md).
+through a pull request with passing checks. See [the shared contribution guide](https://github.com/Abdel-Abdelaal/.github/blob/main/CONTRIBUTING.md).
 
 ## Roadmap
 
@@ -31,3 +31,9 @@ through a pull request with passing checks. See [CONTRIBUTING.md](CONTRIBUTING.m
 - [ ] Phase 3: AI pull request review
 - [ ] Phase 4: preview and production deploys
 - [ ] Phase 5: docs, architecture decisions
+
+## Engineering standards
+
+Follow the [handbook](https://github.com/Abdel-Abdelaal/.github/tree/main/standards).
+Issue forms, the PR template, contribution guidance and the security policy are
+inherited from the account-wide `.github` repository. CODEOWNERS stays local.
