@@ -102,3 +102,12 @@ self-approval; a team would require reviewers and CODEOWNERS approval.
 
 Managed callers pin release commit SHAs; Dependabot proposes reviewed updates.
 The `v1` tag remains available for discovery, while fleet execution is reproducible.
+
+## Advisory AI maintenance
+
+Same-repository PRs receive an isolated MiMo 2.6 Flash review; fork and Dependabot
+PRs skip. Findings are non-blocking summaries and neutral notice annotations.
+Weekly audits maintain one health issue. A bounded, tested draft fix PR is possible
+only after the automation App is configured; otherwise that step skips explicitly.
+No AI check is required for merging, and no AI workflow can merge or approve.
+See [the isolation design](https://github.com/Abdel-Abdelaal/platform-workflows/blob/main/docs/ai.md).
