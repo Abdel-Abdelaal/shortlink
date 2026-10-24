@@ -1,9 +1,37 @@
+"""Wire the HTTP application to storage and time adapters."""
+
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
-app = FastAPI(title="shortlink")
+from shortlink.api.errors import handle_domain_error
+from shortlink.api.routes import create_router
+from shortlink.db.sqlite import SqliteLinkRepository
+from shortlink.domain.errors import ShortlinkError
+from shortlink.domain.ports import SystemClock
+from shortlink.domain.service import LinkService
+from shortlink.settings import Settings
 
 
-@app.get("/health")
-def health() -> dict[str, str]:
-    """Liveness check for load balancers and deploy scripts."""
-    return {"status": "ok"}
+def create_app(settings: Settings | None = None) -> FastAPI:
+    """Build an isolated app, delaying database creation until its lifespan starts."""
+    configured = settings if settings is not None else Settings()
+    repository = SqliteLinkRepository(configured.database_path)
+
+    @asynccontextmanager
+    async def lifespan(application: FastAPI) -> AsyncGenerator[None]:
+        """Initialize storage and bind one stateless service per application."""
+        repository.initialize()
+        application.state.link_service = LinkService(
+            repository, SystemClock(), configured.code_length
+        )
+        yield
+
+    application = FastAPI(title="shortlink", lifespan=lifespan)
+    application.add_exception_handler(ShortlinkError, handle_domain_error)
+    application.include_router(create_router(str(configured.base_url)))
+    return application
+
+
+app = create_app()

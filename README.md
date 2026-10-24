@@ -1,39 +1,101 @@
 # shortlink
 
-A small URL shortener API built with FastAPI. The app is deliberately simple: the
-point of this repo is the engineering around it (branch protection, CI, security
-scanning, AI review, and automated deploys), built up one pull request at a time.
+A FastAPI URL shortener used to demonstrate protected PR delivery, shared CI,
+strict code quality, security scanning and repository governance.
 
-CI logic lives in [platform-workflows](https://github.com/Abdel-Abdelaal/platform-workflows)
-and is called from here.
+## Run locally
 
-## Run it locally
+Install Python 3.12 and [uv](https://docs.astral.sh/uv/getting-started/installation/).
 
-Needs Python 3.12 and [uv](https://docs.astral.sh/uv/).
-
-```bash
-uv sync
+```sh
+uv sync --locked
+uv run pre-commit install
 uv run fastapi dev src/shortlink/main.py
 ```
 
-Then open http://127.0.0.1:8000/health or the interactive docs at http://127.0.0.1:8000/docs.
+Open http://127.0.0.1:8000/docs for interactive API documentation.
+Settings use `SHORTLINK_` environment variables; copy `.env.example` to `.env` for
+local overrides. The database is created at startup, not when Python imports a module.
+Never commit `.env` or the SQLite database.
 
-## How changes get in
+## API
 
-`main` is protected: no direct pushes, no force pushes, and every change goes
-through a pull request with passing checks. See [the shared contribution guide](https://github.com/Abdel-Abdelaal/.github/blob/main/CONTRIBUTING.md).
+| Method | Path | Result |
+|---|---|---|
+| GET | `/health` | liveness JSON |
+| POST | `/links` | 201 with code, short URL, metadata and Location |
+| GET | `/{code}` | 307 redirect; increments hits once |
+| GET | `/links/{code}` | metadata and hit count; does not increment hits |
+| DELETE | `/links/{code}` | 204; 404 if absent |
 
-## Roadmap
+```sh
+curl -X POST http://127.0.0.1:8000/links \
+  -H 'Content-Type: application/json' \
+  -d '{"target_url":"https://example.com/docs","code":"my_docs"}'
+```
 
-- [x] Phase 0: repo foundation (rulesets, templates, PR title check)
-- [ ] Phase 1: lint, types, tests, coverage
-- [ ] Phase 2: security scanning and supply chain
-- [ ] Phase 3: AI pull request review
-- [ ] Phase 4: preview and production deploys
-- [ ] Phase 5: docs, architecture decisions
+Codes contain 4-32 ASCII letters, digits, `_` or `-`. Application route names are
+reserved. Omit code for a random seven-character base62 code. Generated collisions
+retry at most five times. Targets must be HTTP or HTTPS. Optional `expires_at`
+must be an aware future timestamp; a link expires at that instant, returning 410.
+Duplicate codes return 409, missing links 404, and malformed input 422.
+Domain errors use RFC 9457 `application/problem+json`.
 
-## Engineering standards
+This is an unauthenticated educational service. Before a public multi-user launch,
+add authorization for management endpoints, rate limits and abuse prevention.
+SQLite assumes a persistent disk and one deployment instance; horizontal scaling
+needs a shared database. See [the architecture decision](docs/decisions/0001-fastapi-sqlite-uv.md).
 
-Follow the [handbook](https://github.com/Abdel-Abdelaal/.github/tree/main/standards).
-Issue forms, the PR template, contribution guidance and the security policy are
-inherited from the account-wide `.github` repository. CODEOWNERS stays local.
+## Validate
+
+```sh
+uv run ruff format --check .
+uv run ruff check .
+uv run pyright
+uv run pytest --cov --cov-branch --cov-report=xml --cov-report=term-missing
+uv run pre-commit run --all-files
+```
+
+Coverage must remain at least 90%, including branches. Unit tests use a fixed clock
+and fake repository; integration tests use real temporary SQLite databases and
+FastAPI TestClient. Concurrent hit updates, persistence, expiry boundaries and
+collision retries are covered without sleeps.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  HTTP[HTTP request] --> API[FastAPI routes + schemas]
+  API --> Domain[LinkService + domain models]
+  Domain --> Port[LinkRepository + Clock ports]
+  SQLite[SQLite adapter] -.implements.-> Port
+  Time[SystemClock] -.implements.-> Port
+```
+
+Dependencies point inward: domain imports neither FastAPI nor sqlite3. The app
+factory wires adapters at startup; hit counts increment atomically in SQL.
+
+## Engineering controls
+
+CI comes from [platform-workflows](https://github.com/Abdel-Abdelaal/platform-workflows),
+and settings are declared in [github-governance](https://github.com/Abdel-Abdelaal/github-governance).
+The [handbook](https://github.com/Abdel-Abdelaal/.github/tree/main/standards) supplies
+shared issue/PR templates and contribution/security policies. CODEOWNERS stays local.
+
+| Milestone | Status |
+|---|---|
+| Protected PRs and Conventional Commit titles | active |
+| Shared community files and AGENTS.md glossary | active |
+| Lint, strict types, coverage and runtime dependency audit | this phase |
+| Terraform-managed settings and live drift checks | code prepared; owner credentials pending |
+| Sonar analysis | owner sign-up and verified project settings pending |
+| Security scans, AI review, upkeep and container delivery | subsequent phases |
+
+Each change goes through a PR. Deterministic checks can block merges; AI reviews
+remain advisory. Solo repos use zero required approvals because GitHub disallows
+self-approval; a team would require reviewers and CODEOWNERS approval.
+
+## Delivery history
+
+- [Foundation PR](https://github.com/Abdel-Abdelaal/shortlink/pull/1)
+- [Shared defaults and agent context](https://github.com/Abdel-Abdelaal/shortlink/pull/2)
