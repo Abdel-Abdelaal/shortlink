@@ -99,3 +99,6 @@ self-approval; a team would require reviewers and CODEOWNERS approval.
 
 - [Foundation PR](https://github.com/Abdel-Abdelaal/shortlink/pull/1)
 - [Shared defaults and agent context](https://github.com/Abdel-Abdelaal/shortlink/pull/2)
+
+Managed callers pin release commit SHAs; Dependabot proposes reviewed updates.
+The `v1` tag remains available for discovery, while fleet execution is reproducible.
