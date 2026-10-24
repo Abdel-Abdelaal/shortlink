@@ -26,3 +26,9 @@ htmlcov/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Generated data and reports
+*.db
+*.db-*
+coverage.xml
+requirements-audit.txt

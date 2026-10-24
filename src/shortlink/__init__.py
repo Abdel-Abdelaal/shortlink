@@ -1,1 +1,1 @@
-"""shortlink: a small URL shortener API."""
+"""Shortlink API package."""
