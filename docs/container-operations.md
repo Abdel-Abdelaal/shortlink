@@ -39,16 +39,27 @@ exact image that passed smoke/scan, then attaches GitHub OIDC build provenance a
 SBOM attestations to its registry digest. It uploads the SBOM and scan to the
 release. PR validation receives no registry-write token or provider credential.
 
-After a successful release, use the digest from its run summary and verify it:
+The first published release, [v0.1.0](https://github.com/Abdel-Abdelaal/shortlink/releases/tag/v0.1.0),
+passed [hosted build, smoke, scan and publication](https://github.com/Abdel-Abdelaal/shortlink/actions/runs/40148403921).
+Anonymous registry access and both attestations were independently verified with
+the GitHub CLI. The tested image is:
 
-```sh
-gh attestation verify oci://ghcr.io/abdel-abdelaal/shortlink@sha256:REPLACE_WITH_RELEASE_DIGEST \
-  --repo Abdel-Abdelaal/shortlink
+```text
+ghcr.io/abdel-abdelaal/shortlink@sha256:e91a978359cdf1b6bfef0c4f20314f2c336c70387c641bf0c6642f8a394333ef
 ```
 
-Digest placeholders are deliberate: obtain the actual published digest and passing
-evidence from that release. Release publication and verification are pending until
-the first real release workflow has completed; a green PR alone does not prove them.
+Verify provenance and the CycloneDX SBOM before using that exact image:
+
+```sh
+gh attestation verify oci://ghcr.io/abdel-abdelaal/shortlink@sha256:e91a978359cdf1b6bfef0c4f20314f2c336c70387c641bf0c6642f8a394333ef \
+  --repo Abdel-Abdelaal/shortlink
+gh attestation verify oci://ghcr.io/abdel-abdelaal/shortlink@sha256:e91a978359cdf1b6bfef0c4f20314f2c336c70387c641bf0c6642f8a394333ef \
+  --repo Abdel-Abdelaal/shortlink --predicate-type https://cyclonedx.org/bom
+```
+
+The release also contains `sbom.cdx.json` and `trivy.json`. These results establish
+the published artifact's identity and checks at release time; they do not establish
+that a public service is deployed or that future vulnerability scans will pass.
 
 ## Backups and rollback
 
@@ -81,4 +92,5 @@ Debian reports fixed packages for both findings:
 [SQLite tracker](https://security-tracker.debian.org/tracker/CVE-2025-7458),
 [zlib tracker](https://security-tracker.debian.org/tracker/CVE-2023-45853).
 The gate remains unchanged and has no vulnerability suppression file. The rebuilt
-image must pass a fresh scan; this source change alone is not proof of remediation.
+image passed the unchanged critical-severity gate in release run40148403921, linked
+above. Weekly rebuilding and scanning re-evaluates the current vulnerability database.

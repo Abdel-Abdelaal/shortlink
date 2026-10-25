@@ -86,10 +86,14 @@ shared issue/PR templates and contribution/security policies. CODEOWNERS stays l
 |---|---|
 | Protected PRs and Conventional Commit titles | active |
 | Shared community files and AGENTS.md glossary | active |
-| Lint, strict types, coverage and runtime dependency audit | this phase |
-| Terraform-managed settings and live drift checks | code prepared; owner credentials pending |
+| Lint, strict types, coverage and runtime dependency audit | active; 46 tests and 100% branch-aware coverage |
+| Terraform-managed settings | initial protection/security gates applied; HCP migration and scheduled drift pending |
 | Sonar analysis | owner sign-up and verified project settings pending |
-| Security scans, AI review, upkeep and container delivery | subsequent phases |
+| CodeQL, secret scanning and workflow analysis | active |
+| Repository conformance | passing; additional required gate awaits governance apply |
+| Flash review and weekly audit | advisory reviews verified; corrected weekly audit rollout awaiting verification |
+| Baseline propagation, automated fixes and releases | source prepared; maintenance App setup pending |
+| Container delivery | v0.1.0 published and both attestations verified |
 
 Each change goes through a PR. Deterministic checks can block merges; AI reviews
 remain advisory. Solo repos use zero required approvals because GitHub disallows
@@ -110,14 +114,19 @@ non-root runtime, checks HTTP health and SQLite persistence across restart with 
 read-only root filesystem, and scans for critical vulnerabilities. Stable releases
 publish the tested image with provenance and a CycloneDX SBOM after validation.
 See [the operational runbook](docs/container-operations.md) for local smoke checks,
-attestation verification, backup/rollback and the hosting boundary. First hosted
-container validation and release publication are pending until their runs complete.
+attestation verification, backup/rollback and the hosting boundary.
+[v0.1.0](https://github.com/Abdel-Abdelaal/shortlink/releases/tag/v0.1.0) passed
+[hosted release validation](https://github.com/Abdel-Abdelaal/shortlink/actions/runs/40148403921);
+the runbook records its immutable image digest and commands to verify provenance
+and the CycloneDX SBOM. A public application host is still unconfigured.
 
 ## Advisory AI maintenance
 
 Same-repository PRs receive an isolated MiMo 2.6 Flash review; fork and Dependabot
 PRs skip. Findings are non-blocking summaries and neutral notice annotations.
-Weekly audits maintain one health issue. A bounded, tested draft fix PR is possible
+Weekly audits are designed to maintain one health issue. The initial full audit
+failed; corrected tooling passed a local provider integration and awaits hosted
+rollout verification. A bounded, tested draft fix PR is possible
 only after the automation App is configured; otherwise that step skips explicitly.
 No AI check is required for merging, and no AI workflow can merge or approve.
 See [the isolation design](https://github.com/Abdel-Abdelaal/platform-workflows/blob/main/docs/ai.md).
