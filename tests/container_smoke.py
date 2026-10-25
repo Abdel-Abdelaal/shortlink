@@ -34,7 +34,7 @@ def main() -> None:
                 msg = "unexpected health response"
                 raise RuntimeError(msg)
             break
-        except (URLError, TimeoutError):
+        except (URLError, TimeoutError, ConnectionError):
             if attempt == 29:
                 raise
             time.sleep(1)
