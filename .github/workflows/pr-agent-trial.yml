@@ -38,7 +38,7 @@ jobs:
             echo 'ready=false' >> "$GITHUB_OUTPUT"
             echo 'AI_API_KEY not set: PR-Agent trial skipped.' >> "$GITHUB_STEP_SUMMARY"
           fi
-      - uses: The-PR-Agent/pr-agent@8e5a9295973b24af4b70cafd0b660a230811ef9e # v0.47.0
+      - uses: Abdel-Abdelaal/platform-workflows/actions/pr-agent@f60efba792d811aa8a848cc465c3ae20523fdf14 # reviewed v0.47.0 runtime adapter
         if: steps.key.outputs.ready == 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
