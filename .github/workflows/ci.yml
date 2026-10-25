@@ -9,7 +9,7 @@ on:
 permissions: {}
 jobs:
   ci:
-    uses: Abdel-Abdelaal/platform-workflows/.github/workflows/python-ci.yml@c0d3bb1d4a3e0fef8ffd893d33adccea286a4eba # pre-release test of platform PR 26
+    uses: Abdel-Abdelaal/platform-workflows/.github/workflows/python-ci.yml@9963dc1ffc49cff752cc62f2ec9c1651bdb3f482 # v1.6.0
     permissions:
       contents: read
     secrets:
