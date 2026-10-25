@@ -103,6 +103,16 @@ self-approval; a team would require reviewers and CODEOWNERS approval.
 Managed callers pin release commit SHAs; Dependabot proposes reviewed updates.
 The `v1` tag remains available for discovery, while fleet execution is reproducible.
 
+## Container evidence and recovery
+
+The [container workflow](.github/workflows/container.yml) builds the digest-pinned,
+non-root runtime, checks HTTP health and SQLite persistence across restart with a
+read-only root filesystem, and scans for critical vulnerabilities. Stable releases
+publish the tested image with provenance and a CycloneDX SBOM after validation.
+See [the operational runbook](docs/container-operations.md) for local smoke checks,
+attestation verification, backup/rollback and the hosting boundary. First hosted
+container validation and release publication are pending until their runs complete.
+
 ## Advisory AI maintenance
 
 Same-repository PRs receive an isolated MiMo 2.6 Flash review; fork and Dependabot

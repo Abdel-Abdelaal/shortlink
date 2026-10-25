@@ -30,3 +30,15 @@ updates:
       include: scope
     labels: [dependencies]
     open-pull-requests-limit: 5
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 14
+    commit-message:
+      prefix: build
+      include: scope
+    labels: [dependencies]
+    open-pull-requests-limit: 5
