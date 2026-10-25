@@ -139,7 +139,7 @@ only after the automation App is configured; otherwise that step skips explicitl
 No AI check is required for merging, and no AI workflow can merge or approve.
 See [the isolation design](https://github.com/Abdel-Abdelaal/platform-workflows/blob/main/docs/ai.md).
 
-Maintenance callers now pin platform v1.5.0 (`e26d5b07bdee2fc54ed5bd607d8041f7fbeaadaf`).
+Maintenance callers now pin platform v1.6.0 (`9963dc1ffc49cff752cc62f2ec9c1651bdb3f482`).
 Its corrected AI runtime awaits consumer audit verification. Frozen hook checks
 run where a hook configuration is supported; native Dependabot maintains baseline
 hook revisions. Stale/release mutations remain explicitly gated on canonical
