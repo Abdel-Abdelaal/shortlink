@@ -32,6 +32,9 @@ Never commit `.env` or the SQLite database.
 curl -X POST http://127.0.0.1:8000/links \
   -H 'Content-Type: application/json' \
   -d '{"target_url":"https://example.com/docs","code":"my_docs"}'
+curl -i http://127.0.0.1:8000/my_docs
+curl http://127.0.0.1:8000/links/my_docs
+curl -X DELETE http://127.0.0.1:8000/links/my_docs
 ```
 
 Codes contain 4-32 ASCII letters, digits, `_` or `-`. Application route names are
