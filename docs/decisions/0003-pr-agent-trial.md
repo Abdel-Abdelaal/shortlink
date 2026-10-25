@@ -49,3 +49,13 @@ it never gives the model process a GitHub token.
   comments. Forks and Dependabot PRs never run it.
 - Revisit after a month of PRs. Widen it to the fleet only if its findings keep
   outperforming the isolated runner's.
+
+### Immutable runtime
+
+The upstream action source was pinned to v0.47.0, but its Dockerfile fetched the
+mutable `github_action` container tag. The trial now uses the reviewed platform
+adapter, whose Dockerfile selects the published v0.47.0 image by full manifest
+digest and invokes the upstream GitHub entrypoint. See the
+[adapter provenance and upstream licensing](https://github.com/Abdel-Abdelaal/platform-workflows/tree/f60efba792d811aa8a848cc465c3ae20523fdf14/actions/pr-agent).
+This preserves the existing co-located credential trade-off. It does not add the
+isolated runner's full telemetry to PR-Agent.
