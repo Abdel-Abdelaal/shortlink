@@ -17,7 +17,9 @@ Follow the handbook: https://github.com/Abdel-Abdelaal/.github/tree/main/standar
 - Domain errors are mapped to HTTP in `api/errors.py` only.
 - Every change needs tests. Coverage must stay at or above 90%.
 
-## Glossary (one name per concept; use exactly these)
+## Glossary
+
+one name per concept; use exactly these.
 | Name | Meaning | Never call it |
 |---|---|---|
 | link | a stored mapping from a code to a target URL | url, mapping, entry, record |
