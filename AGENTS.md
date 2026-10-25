@@ -21,6 +21,7 @@ Follow the handbook: <https://github.com/Abdel-Abdelaal/.github/tree/main/standa
 ## Glossary
 
 one name per concept; use exactly these.
+
 | Name | Meaning | Never call it |
 | --- | --- | --- |
 | link | a stored mapping from a code to a target URL | url, mapping, entry, record |
