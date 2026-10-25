@@ -5,7 +5,7 @@ description = "A small URL shortener demonstrating production engineering."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
-dependencies = ["fastapi[standard]>=0.162", "pydantic>=2.14.1", "pydantic-settings>=2.16"]
+dependencies = ["fastapi[standard]>=0.162", "pydantic>=2.14.1", "pydantic-settings>=2.16", "starlette>=1.10.0"]
 
 [dependency-groups]
 dev = [
@@ -67,6 +67,9 @@ forbidden_modules = ["shortlink.api", "shortlink.db", "shortlink.main", "fastapi
 name = "Adapters do not depend on each other"
 type = "independence"
 modules = ["shortlink.api", "shortlink.db"]
+
+[tool.deptry]
+known_first_party = ["shortlink"]
 
 [tool.vulture]
 paths = ["src", "tests"]
