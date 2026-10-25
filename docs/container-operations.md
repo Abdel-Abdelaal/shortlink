@@ -72,3 +72,13 @@ moderation. Keep the port bound to loopback until a reviewed deployment adds tho
 controls, TLS, trusted ingress configuration, monitoring and an explicit recovery
 objective. The application does not fetch target URLs; it redirects clients.
 `--no-proxy-headers` avoids trusting forwarded client headers by default.
+
+## Base image remediation evidence
+
+The first hosted scan blocked the Bookworm runtime for CVE-2025-7458 (SQLite) and
+CVE-2023-45853 (zlib). The runtime and builder now use digest-pinned Trixie, where
+Debian reports fixed packages for both findings:
+[SQLite tracker](https://security-tracker.debian.org/tracker/CVE-2025-7458),
+[zlib tracker](https://security-tracker.debian.org/tracker/CVE-2023-45853).
+The gate remains unchanged and has no vulnerability suppression file. The rebuilt
+image must pass a fresh scan; this source change alone is not proof of remediation.

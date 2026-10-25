@@ -1,6 +1,6 @@
 FROM ghcr.io/astral-sh/uv:0.13.0@sha256:cdc6093146eb3ff6a40107b38f008b789e050e77ad87865e381d9917da55a168 AS uv
 
-FROM python:3.12-slim-bookworm@sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70 AS build
+FROM python:3.12-slim-trixie@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704 AS build
 COPY --from=uv /uv /usr/local/bin/uv
 ENV UV_LINK_MODE=copy UV_COMPILE_BYTECODE=1 UV_PYTHON_DOWNLOADS=never
 WORKDIR /app
@@ -8,7 +8,7 @@ COPY pyproject.toml uv.lock README.md LICENSE ./
 COPY src/ ./src/
 RUN uv sync --locked --no-dev --no-editable --python /usr/local/bin/python
 
-FROM python:3.12-slim-bookworm@sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70 AS runtime
+FROM python:3.12-slim-trixie@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704 AS runtime
 LABEL org.opencontainers.image.source="https://github.com/Abdel-Abdelaal/shortlink"
 RUN groupadd --gid 10001 shortlink \
     && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin shortlink \

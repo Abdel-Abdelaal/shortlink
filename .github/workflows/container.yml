@@ -1,7 +1,6 @@
 name: Container delivery
 on:
   pull_request:
-    paths: [Dockerfile, .dockerignore, 'src/**', 'tests/container_smoke.py', pyproject.toml, uv.lock, '.github/workflows/container.yml']
   push:
     branches: [main]
     paths: [Dockerfile, .dockerignore, 'src/**', 'tests/container_smoke.py', pyproject.toml, uv.lock, '.github/workflows/container.yml']
