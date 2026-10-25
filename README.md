@@ -112,3 +112,12 @@ publish the tested image with provenance and a CycloneDX SBOM after validation.
 See [the operational runbook](docs/container-operations.md) for local smoke checks,
 attestation verification, backup/rollback and the hosting boundary. First hosted
 container validation and release publication are pending until their runs complete.
+
+## Advisory AI maintenance
+
+Same-repository PRs receive an isolated MiMo 2.6 Flash review; fork and Dependabot
+PRs skip. Findings are non-blocking summaries and neutral notice annotations.
+Weekly audits maintain one health issue. A bounded, tested draft fix PR is possible
+only after the automation App is configured; otherwise that step skips explicitly.
+No AI check is required for merging, and no AI workflow can merge or approve.
+See [the isolation design](https://github.com/Abdel-Abdelaal/platform-workflows/blob/main/docs/ai.md).
