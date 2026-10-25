@@ -39,7 +39,9 @@ reserved. Omit code for a random seven-character base62 code. Generated collisio
 retry at most five times. Targets must be HTTP or HTTPS. Optional `expires_at`
 must be an aware future timestamp; a link expires at that instant, returning 410.
 Duplicate codes return 409, missing links 404, and malformed input 422.
-Domain errors use RFC 9457 `application/problem+json`.
+Every error, including malformed bodies and validation failures, uses RFC 9457
+`application/problem+json`, and each route documents its error statuses in the
+OpenAPI schema.
 
 This is an unauthenticated educational service. Before a public multi-user launch,
 add authorization for management endpoints, rate limits and abuse prevention.
@@ -54,11 +56,17 @@ uv run ruff check .
 uv run pyright
 uv run pytest --cov --cov-branch --cov-report=xml --cov-report=term-missing
 uv run pre-commit run --all-files
+uv run lint-imports   # architecture contracts (import-linter)
+uv run deptry src     # missing/unused dependencies
+uv run vulture        # dead code
 ```
 
 Coverage must remain at least 90%, including branches. Unit tests use a fixed clock
 and fake repository; integration tests use real temporary SQLite databases and
-FastAPI TestClient. Concurrent hit updates, persistence, expiry boundaries and
+FastAPI TestClient. [Hypothesis](https://hypothesis.readthedocs.io/) checks the
+short-code rules across generated inputs, and [Schemathesis](https://schemathesis.io/)
+generates requests from the published OpenAPI schema and checks every response
+against it. Concurrent hit updates, persistence, expiry boundaries and
 collision retries are covered without sleeps.
 
 ## Architecture
@@ -86,7 +94,7 @@ shared issue/PR templates and contribution/security policies. CODEOWNERS stays l
 |---|---|
 | Protected PRs and Conventional Commit titles | active |
 | Shared community files and AGENTS.md glossary | active |
-| Lint, strict types, coverage and runtime dependency audit | active; 46 tests and 100% branch-aware coverage |
+| Lint, strict types, coverage and runtime dependency audit | active; 59 tests (plus generated property and schema cases), 100% branch-aware coverage |
 | Terraform-managed settings | initial protection/security gates applied; HCP migration and scheduled drift pending |
 | Sonar analysis | owner sign-up and verified project settings pending |
 | CodeQL, secret scanning and workflow analysis | active |

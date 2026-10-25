@@ -8,6 +8,7 @@ FastAPI URL shortener. The engineering around it (CI, security, governance) is t
 - Test: `uv run pytest --cov`
 - Lint/format: `uv run ruff check --fix . && uv run ruff format .`
 - Types: `uv run pyright`
+- Architecture, dependencies, dead code: `uv run lint-imports && uv run deptry src && uv run vulture`
 - Hooks: `uv run pre-commit install`
 
 ## Rules

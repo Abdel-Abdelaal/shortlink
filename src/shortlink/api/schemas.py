@@ -2,7 +2,9 @@
 
 from datetime import datetime
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, HttpUrl
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, HttpUrl
+
+from shortlink.domain.codes import CODE_PATTERN
 
 
 class CreateLinkRequest(BaseModel):
@@ -11,8 +13,19 @@ class CreateLinkRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     target_url: HttpUrl
-    code: str | None = None
+    code: str | None = Field(default=None, pattern=CODE_PATTERN.pattern)
     expires_at: AwareDatetime | None = None
+
+
+class Problem(BaseModel):
+    """An RFC 9457 problem details body, used for every error response."""
+
+    type: str
+    title: str
+    status: int
+    detail: str
+    instance: str
+    errors: list[dict[str, object]] | None = None
 
 
 class LinkResponse(BaseModel):
