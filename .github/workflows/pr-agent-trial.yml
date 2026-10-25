@@ -1,7 +1,8 @@
 # Trial: PR-Agent (open source) as a second advisory reviewer on the same MiMo
 # key, compared against the isolated platform runner. Never a required check.
 # Unlike the platform runner, PR-Agent runs the model and the GitHub token in
-# one process; that trade-off is what the trial weighs (see docs/decisions).
+# one process; that trade-off is recorded in docs/decisions/0003-pr-agent-trial.md.
+# No checkout: PR-Agent reads the diff through the GitHub API (verified on PR 14).
 name: PR-Agent trial
 on:
   pull_request:
@@ -15,7 +16,7 @@ jobs:
     name: PR-Agent (advisory trial)
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
-      github.actor != 'dependabot[bot]'
+      github.event.pull_request.user.id != 49699333
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
