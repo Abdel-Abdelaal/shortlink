@@ -130,3 +130,9 @@ rollout verification. A bounded, tested draft fix PR is possible
 only after the automation App is configured; otherwise that step skips explicitly.
 No AI check is required for merging, and no AI workflow can merge or approve.
 See [the isolation design](https://github.com/Abdel-Abdelaal/platform-workflows/blob/main/docs/ai.md).
+
+Maintenance callers now pin platform v1.5.0 (`e26d5b07bdee2fc54ed5bd607d8041f7fbeaadaf`).
+Its corrected AI runtime awaits consumer audit verification. Frozen hook checks
+run where a hook configuration is supported; native Dependabot maintains baseline
+hook revisions. Stale/release mutations remain explicitly gated on canonical
+labels and maintenance App setup. The Python audit includes development tooling.

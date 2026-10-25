@@ -1,0 +1,15 @@
+name: Release proposals
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions: {}
+jobs:
+  release:
+    uses: Abdel-Abdelaal/platform-workflows/.github/workflows/release.yml@e26d5b07bdee2fc54ed5bd607d8041f7fbeaadaf # v1.5.0
+    permissions:
+      contents: read
+      issues: write
+    secrets:
+      BOT_APP_ID: ${{ secrets.BOT_APP_ID }}
+      BOT_APP_KEY: ${{ secrets.BOT_APP_KEY }}
