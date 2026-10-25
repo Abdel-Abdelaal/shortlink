@@ -5,7 +5,9 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from starlette.requests import Request
 
+from shortlink.api.errors import handle_http_error
 from shortlink.main import create_app
 from shortlink.settings import Settings
 
@@ -121,3 +123,36 @@ def test_link_persists_across_app_instances(tmp_path: Path) -> None:
         )
     with TestClient(create_app(settings)) as second:
         assert second.get("/persist1", follow_redirects=False).status_code == 307
+
+
+def test_malformed_body_is_a_documented_problem(client: TestClient) -> None:
+    response = client.post(
+        "/links",
+        content=b"\xff\xfe not json",
+        headers={"Content-Type": "application/json"},
+    )
+    assert response.status_code in {400, 422}
+    assert response.headers["content-type"] == "application/problem+json"
+    assert response.json()["status"] == response.status_code
+
+
+def test_validation_errors_use_the_problem_format(client: TestClient) -> None:
+    response = client.post("/links", json={"target_url": "not a url"})
+    assert response.status_code == 422
+    assert response.headers["content-type"] == "application/problem+json"
+    body = response.json()
+    assert body["title"] == "Invalid request"
+    assert body["errors"][0]["loc"] == ["body", "target_url"]
+
+
+def test_unknown_route_uses_the_problem_format(client: TestClient) -> None:
+    response = client.get("/links/abc123/extra")
+    assert response.status_code == 404
+    assert response.headers["content-type"] == "application/problem+json"
+
+
+@pytest.mark.anyio
+async def test_http_handler_rejects_non_http_errors() -> None:
+    request = Request({"type": "http", "path": "/", "headers": [], "method": "GET"})
+    with pytest.raises(ValueError, match="boom"):
+        await handle_http_error(request, ValueError("boom"))
