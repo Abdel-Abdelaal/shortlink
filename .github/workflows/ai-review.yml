@@ -6,7 +6,7 @@ permissions: {}
 jobs:
   review:
     if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.id != 49699333
-    uses: Abdel-Abdelaal/platform-workflows/.github/workflows/ai-review.yml@2e70632da453ff873e98687b9e58dc6df16c7746 # reviewed v1.7.0 telemetry candidate
+    uses: Abdel-Abdelaal/platform-workflows/.github/workflows/ai-review.yml@fac9ee28b0217a9d65e97a866bb87dfe1b92b0f2 # v1.7.0
     permissions:
       contents: write
       actions: read
