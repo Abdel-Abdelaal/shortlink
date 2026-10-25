@@ -6,7 +6,7 @@ on:
 permissions: {}
 jobs:
   audit:
-    uses: Abdel-Abdelaal/platform-workflows/.github/workflows/ai-audit.yml@2e70632da453ff873e98687b9e58dc6df16c7746 # reviewed v1.7.0 telemetry candidate
+    uses: Abdel-Abdelaal/platform-workflows/.github/workflows/ai-audit.yml@40e5261e2e39d8d0c88e709c26385cab3cc43466 # reviewed v1.7.0 telemetry candidate
     permissions:
       contents: write
       actions: read
@@ -19,7 +19,7 @@ jobs:
       AI_API_KEY: ${{ secrets.AI_API_KEY }}
   fix:
     needs: audit
-    uses: Abdel-Abdelaal/platform-workflows/.github/workflows/ai-fix.yml@2e70632da453ff873e98687b9e58dc6df16c7746 # reviewed v1.7.0 telemetry candidate
+    uses: Abdel-Abdelaal/platform-workflows/.github/workflows/ai-fix.yml@40e5261e2e39d8d0c88e709c26385cab3cc43466 # reviewed v1.7.0 telemetry candidate
     permissions:
       contents: write
       actions: read
