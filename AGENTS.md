@@ -12,7 +12,7 @@ FastAPI URL shortener. The engineering around it (CI, security, governance) is t
 - Hooks: `uv run pre-commit install`
 
 ## Rules
-Follow the handbook: https://github.com/Abdel-Abdelaal/.github/tree/main/standards
+Follow the handbook: <https://github.com/Abdel-Abdelaal/.github/tree/main/standards>
 (python.md for code, commits.md for messages, code-review.md for review comments).
 - `domain/` never imports FastAPI, sqlite3 or anything in `api/` or `db/`.
 - Domain errors are mapped to HTTP in `api/errors.py` only.
@@ -22,7 +22,7 @@ Follow the handbook: https://github.com/Abdel-Abdelaal/.github/tree/main/standar
 
 one name per concept; use exactly these.
 | Name | Meaning | Never call it |
-|---|---|---|
+| --- | --- | --- |
 | link | a stored mapping from a code to a target URL | url, mapping, entry, record |
 | code | the short identifier in the path, e.g. `abc123` | slug, key, id, short_id, hash |
 | target_url | where a link redirects | long_url, original_url, destination, url |

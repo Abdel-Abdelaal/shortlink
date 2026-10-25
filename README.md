@@ -13,7 +13,7 @@ uv run pre-commit install
 uv run fastapi dev src/shortlink/main.py
 ```
 
-Open http://127.0.0.1:8000/docs for interactive API documentation.
+Open <http://127.0.0.1:8000/docs> for interactive API documentation.
 Settings use `SHORTLINK_` environment variables; copy `.env.example` to `.env` for
 local overrides. The database is created at startup, not when Python imports a module.
 Never commit `.env` or the SQLite database.
@@ -21,7 +21,7 @@ Never commit `.env` or the SQLite database.
 ## API
 
 | Method | Path | Result |
-|---|---|---|
+| --- | --- | --- |
 | GET | `/health` | liveness JSON |
 | POST | `/links` | 201 with code, short URL, metadata and Location |
 | GET | `/{code}` | 307 redirect; increments hits once |
@@ -91,7 +91,7 @@ The [handbook](https://github.com/Abdel-Abdelaal/.github/tree/main/standards) su
 shared issue/PR templates and contribution/security policies. CODEOWNERS stays local.
 
 | Milestone | Status |
-|---|---|
+| --- | --- |
 | Protected PRs and Conventional Commit titles | active |
 | Shared community files and AGENTS.md glossary | active |
 | Lint, strict types, coverage and runtime dependency audit | active; 59 tests (plus generated property and schema cases), 100% branch-aware coverage |
@@ -139,7 +139,7 @@ only after the automation App is configured; otherwise that step skips explicitl
 No AI check is required for merging, and no AI workflow can merge or approve.
 See [the isolation design](https://github.com/Abdel-Abdelaal/platform-workflows/blob/main/docs/ai.md).
 
-Maintenance callers now pin platform v1.9.0 (`0b7cd6a33abb89db1743c91d3f11cf98179ebcd2`).
+Maintenance callers now pin platform v1.9.1 (`7b7bea4e50c6ee1b1dcf0d318e4504655678b0b8`).
 Signed AI evidence and measured runs appear in the
 [public AI observatory](https://abdel-abdelaal.github.io/github-governance/). Frozen hook checks
 run where a hook configuration is supported; native Dependabot maintains baseline
