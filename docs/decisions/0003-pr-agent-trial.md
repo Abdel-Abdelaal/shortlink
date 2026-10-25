@@ -27,7 +27,7 @@ tools such as Cursor Bugbot could do this job instead.
 Both reviewers ran on the PR that added the trial, with the same model and key.
 
 | | Isolated runner | PR-Agent |
-|---|---|---|
+| --- | --- | --- |
 | Ran on first attempt | yes | yes |
 | Real finding only it caught | comment pointed at an ADR that didn't exist | Dependabot skip used `github.actor`, bypassable by a human push |
 | Shared false alarm | "missing checkout" (PR-Agent reads the diff via API) | same |
