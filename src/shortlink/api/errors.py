@@ -21,6 +21,11 @@ from shortlink.domain.errors import (
 
 PROBLEM_MEDIA_TYPE = "application/problem+json"
 VALIDATION_STATUS = 422
+FALLBACK_PROBLEM: tuple[int, str, str] = (
+    500,
+    "Internal error",
+    "The request could not be completed.",
+)
 PROBLEMS: dict[type[Exception], tuple[int, str, str]] = {
     LinkNotFoundError: (404, "Link not found", "No link exists for that code."),
     LinkExpiredError: (410, "Link expired", "The link has reached its expiry time."),
@@ -57,9 +62,17 @@ def problem(
     )
 
 
+def _lookup(error: Exception) -> tuple[int, str, str]:
+    """Find the nearest registered problem for an error, else the generic one."""
+    for ancestor in type(error).__mro__:
+        if problem_found := PROBLEMS.get(ancestor):
+            return problem_found
+    return FALLBACK_PROBLEM
+
+
 async def handle_domain_error(request: Request, error: Exception) -> JSONResponse:
     """Map a domain error to its documented status."""
-    status, title, detail = PROBLEMS[type(error)]
+    status, title, detail = _lookup(error)
     return problem(request, status, title, detail)
 
 

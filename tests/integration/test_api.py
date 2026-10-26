@@ -1,3 +1,4 @@
+import json
 import sqlite3
 from contextlib import closing
 from datetime import UTC, datetime, timedelta
@@ -7,7 +8,8 @@ import pytest
 from fastapi.testclient import TestClient
 from starlette.requests import Request
 
-from shortlink.api.errors import handle_http_error
+from shortlink.api.errors import handle_domain_error, handle_http_error
+from shortlink.domain.errors import CodeTakenError, ShortlinkError
 from shortlink.main import create_app
 from shortlink.settings import Settings
 
@@ -156,3 +158,32 @@ async def test_http_handler_rejects_non_http_errors() -> None:
     request = Request({"type": "http", "path": "/", "headers": [], "method": "GET"})
     with pytest.raises(ValueError, match="boom"):
         await handle_http_error(request, ValueError("boom"))
+
+
+@pytest.mark.anyio
+async def test_subclass_of_registered_error_inherits_problem() -> None:
+    class CustomCodeTaken(CodeTakenError):
+        pass
+
+    request = Request({"type": "http", "path": "/", "headers": [], "method": "GET"})
+    response = await handle_domain_error(request, CustomCodeTaken())
+    assert response.status_code == 409
+    assert response.headers["content-type"] == "application/problem+json"
+    body = json.loads(response.body)
+    assert body["title"] == "Code already exists"
+    assert body["status"] == 409
+    assert body["instance"] == "/"
+
+
+@pytest.mark.anyio
+async def test_unregistered_domain_error_falls_back_without_leaking() -> None:
+    class Unexpected(ShortlinkError):
+        pass
+
+    request = Request({"type": "http", "path": "/", "headers": [], "method": "GET"})
+    response = await handle_domain_error(request, Unexpected("secret db detail"))
+    assert response.status_code == 500
+    assert response.headers["content-type"] == "application/problem+json"
+    body = json.loads(response.body)
+    assert body["title"] == "Internal error"
+    assert "secret db detail" not in response.body.decode()
