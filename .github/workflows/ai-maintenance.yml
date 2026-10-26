@@ -6,7 +6,7 @@ on:
 permissions: {}
 jobs:
   audit:
-    uses: Abdel-Abdelaal/platform-workflows/.github/workflows/ai-audit.yml@7b7bea4e50c6ee1b1dcf0d318e4504655678b0b8 # v1.9.1
+    uses: Abdel-Abdelaal/platform-workflows/.github/workflows/ai-audit.yml@46f1cc55e8442e4b31679e02dc54e19fb3a420ba # reviewed audit-proposals candidate
     permissions:
       contents: write
       actions: read
