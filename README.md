@@ -46,6 +46,18 @@ Every error, including malformed bodies and validation failures, uses RFC 9457
 `application/problem+json`, and each route documents its error statuses in the
 OpenAPI schema.
 
+For example, `GET /links/does_not_exist` returns 404 with this body:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Link not found",
+  "status": 404,
+  "detail": "No link exists for that code.",
+  "instance": "/links/does_not_exist"
+}
+```
+
 This is an unauthenticated educational service. Before a public multi-user launch,
 add authorization for management endpoints, rate limits and abuse prevention.
 SQLite assumes a persistent disk and one deployment instance; horizontal scaling
