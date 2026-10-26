@@ -29,6 +29,14 @@ Never commit `.env` or the SQLite database.
 | DELETE | `/links/{code}` | 204; 404 if absent |
 
 ```sh
+curl http://127.0.0.1:8000/health
+```
+
+```json
+{"status": "ok"}
+```
+
+```sh
 curl -X POST http://127.0.0.1:8000/links \
   -H 'Content-Type: application/json' \
   -d '{"target_url":"https://example.com/docs","code":"my_docs"}'
