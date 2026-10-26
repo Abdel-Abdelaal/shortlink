@@ -109,7 +109,7 @@ shared issue/PR templates and contribution/security policies. CODEOWNERS stays l
 | --- | --- |
 | Protected PRs and Conventional Commit titles | active |
 | Shared community files and AGENTS.md glossary | active |
-| Lint, strict types, coverage and runtime dependency audit | active; 59 tests (plus generated property and schema cases), 100% branch-aware coverage |
+| Lint, strict types, coverage and runtime dependency audit | active; branch coverage of at least 90% enforced (`fail_under = 90`) |
 | Terraform-managed settings | initial protection/security gates applied; HCP migration and scheduled drift pending |
 | Sonar analysis | owner sign-up and verified project settings pending |
 | CodeQL, secret scanning and workflow analysis | active |
