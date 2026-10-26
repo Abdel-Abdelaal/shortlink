@@ -162,14 +162,14 @@ async def test_http_handler_rejects_non_http_errors() -> None:
 
 @pytest.mark.anyio
 async def test_subclass_of_registered_error_inherits_problem() -> None:
-    class CustomCodeTaken(CodeTakenError):
+    class CustomCodeTakenError(CodeTakenError):
         pass
 
     request = Request({"type": "http", "path": "/", "headers": [], "method": "GET"})
-    response = await handle_domain_error(request, CustomCodeTaken())
+    response = await handle_domain_error(request, CustomCodeTakenError())
     assert response.status_code == 409
     assert response.headers["content-type"] == "application/problem+json"
-    body = json.loads(response.body)
+    body = json.loads(bytes(response.body))
     assert body["title"] == "Code already exists"
     assert body["status"] == 409
     assert body["instance"] == "/"
@@ -177,13 +177,14 @@ async def test_subclass_of_registered_error_inherits_problem() -> None:
 
 @pytest.mark.anyio
 async def test_unregistered_domain_error_falls_back_without_leaking() -> None:
-    class Unexpected(ShortlinkError):
+    class UnexpectedError(ShortlinkError):
         pass
 
     request = Request({"type": "http", "path": "/", "headers": [], "method": "GET"})
-    response = await handle_domain_error(request, Unexpected("secret db detail"))
+    response = await handle_domain_error(request, UnexpectedError("secret db detail"))
     assert response.status_code == 500
     assert response.headers["content-type"] == "application/problem+json"
-    body = json.loads(response.body)
+    raw = bytes(response.body)
+    body = json.loads(raw)
     assert body["title"] == "Internal error"
-    assert "secret db detail" not in response.body.decode()
+    assert "secret db detail" not in raw.decode()
