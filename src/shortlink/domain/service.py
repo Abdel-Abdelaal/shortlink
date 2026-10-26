@@ -54,21 +54,17 @@ class LinkService:
             raise InvalidExpiryError
         if code is not None:
             validate_code(code)
-            link = Link(code, target_url, created_at, expires_at)
-            self._repository.add(link)
-            return link
+            return self._store(code, target_url, created_at, expires_at)
         for _ in range(MAX_CODE_ATTEMPTS):
             candidate = generate_code(self._code_length)
             try:
                 validate_code(candidate)
             except InvalidCodeError:
                 continue
-            link = Link(candidate, target_url, created_at, expires_at)
             try:
-                self._repository.add(link)
+                return self._store(candidate, target_url, created_at, expires_at)
             except CodeTakenError:
                 continue
-            return link
         raise CodeTakenError
 
     def resolve(self, code: str) -> Link:
@@ -97,3 +93,15 @@ class LinkService:
     def delete(self, code: str) -> None:
         """Delete a stored link or raise LinkNotFoundError."""
         self._repository.delete(code)
+
+    def _store(
+        self,
+        code: str,
+        target_url: str,
+        created_at: datetime,
+        expires_at: datetime | None,
+    ) -> Link:
+        """Construct a link and persist it through the repository port."""
+        link = Link(code, target_url, created_at, expires_at)
+        self._repository.add(link)
+        return link
