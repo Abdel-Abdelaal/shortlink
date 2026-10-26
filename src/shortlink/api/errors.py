@@ -85,7 +85,10 @@ async def handle_http_error(request: Request, error: Exception) -> JSONResponse:
     """Give framework errors (malformed body, unknown route) the same format."""
     if not isinstance(error, StarletteHTTPException):
         raise error
-    title = HTTPStatus(error.status_code).phrase
+    try:
+        title = HTTPStatus(error.status_code).phrase
+    except ValueError:
+        title = "Error"  # nonstandard status (499, 599): keep status, generic title
     response = problem(request, error.status_code, title, str(error.detail))
     response.headers.update(error.headers or {})
     return response

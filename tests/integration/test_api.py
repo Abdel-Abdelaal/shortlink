@@ -1,3 +1,4 @@
+import json
 import sqlite3
 from contextlib import closing
 from datetime import UTC, datetime, timedelta
@@ -5,6 +6,7 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.requests import Request
 
 from shortlink.api.errors import handle_http_error
@@ -156,3 +158,35 @@ async def test_http_handler_rejects_non_http_errors() -> None:
     request = Request({"type": "http", "path": "/", "headers": [], "method": "GET"})
     with pytest.raises(ValueError, match="boom"):
         await handle_http_error(request, ValueError("boom"))
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("status", [499, 599])
+async def test_http_handler_keeps_nonstandard_status(status: int) -> None:
+    request = Request({"type": "http", "path": "/", "headers": [], "method": "GET"})
+    response = await handle_http_error(
+        request,
+        StarletteHTTPException(
+            status,
+            detail="Client Closed Request",
+            headers={"x-custom": "1"},
+        ),
+    )
+    body = json.loads(response.body)
+    assert response.status_code == status
+    assert response.media_type == "application/problem+json"
+    assert body["status"] == status
+    assert body["detail"] == "Client Closed Request"
+    assert body["title"] == "Error"
+    assert response.headers["x-custom"] == "1"
+
+
+@pytest.mark.anyio
+async def test_http_handler_keeps_standard_status_title() -> None:
+    request = Request({"type": "http", "path": "/", "headers": [], "method": "GET"})
+    response = await handle_http_error(
+        request, StarletteHTTPException(404, detail="Not Found")
+    )
+    body = json.loads(response.body)
+    assert body["title"] == "Not Found"
+    assert body["status"] == 404
