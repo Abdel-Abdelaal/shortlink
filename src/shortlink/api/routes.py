@@ -3,9 +3,10 @@
 from typing import Annotated, cast
 
 from fastapi import APIRouter, Depends, Path, Request, Response, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from shortlink.api.errors import problem_responses
+from shortlink.api.responses import head_response
 from shortlink.api.schemas import CreateLinkRequest, LinkResponse
 from shortlink.domain.codes import CODE_PATTERN
 from shortlink.domain.models import Link
@@ -33,6 +34,11 @@ def link_response(link: Link, base_url: str) -> LinkResponse:
     )
 
 
+def redirect_response(link: Link) -> RedirectResponse:
+    """Build the redirect once so HEAD and GET expose the identical Location."""
+    return RedirectResponse(link.target_url, status_code=307)
+
+
 def create_router(base_url: str) -> APIRouter:
     """Build routes with the configured public URL."""
     router = APIRouter()
@@ -41,6 +47,11 @@ def create_router(base_url: str) -> APIRouter:
     def health() -> dict[str, str]:
         """Report liveness for load balancers and deployment smoke tests."""
         return {"status": "ok"}
+
+    @router.head("/health", include_in_schema=False)
+    def health_head() -> Response:
+        """Answer a liveness probe with the GET status and content type."""
+        return head_response(JSONResponse(health()))
 
     @router.post(
         "/links",
@@ -70,6 +81,13 @@ def create_router(base_url: str) -> APIRouter:
         service.delete(code)
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+    @router.head("/{code}", status_code=307, include_in_schema=False)
+    def preview_link(
+        code: CodeParameter, service: LinkServiceDependency
+    ) -> RedirectResponse:
+        """Return the redirect target for a safe preview without counting a hit."""
+        return redirect_response(service.inspect(code))
+
     @router.get(
         "/{code}",
         status_code=307,
@@ -80,6 +98,6 @@ def create_router(base_url: str) -> APIRouter:
         code: CodeParameter, service: LinkServiceDependency
     ) -> RedirectResponse:
         """Redirect to an active link and count the successful resolution."""
-        return RedirectResponse(service.resolve(code).target_url, status_code=307)
+        return redirect_response(service.resolve(code))
 
     return router

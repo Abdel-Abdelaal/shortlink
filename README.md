@@ -23,8 +23,10 @@ Never commit `.env` or the SQLite database.
 | Method | Path | Result |
 | --- | --- | --- |
 | GET | `/health` | liveness JSON |
+| HEAD | `/health` | 200, empty body; content type matches GET |
 | POST | `/links` | 201 with code, short URL, metadata and Location |
 | GET | `/{code}` | 307 redirect; increments hits once |
+| HEAD | `/{code}` | 307, same Location as GET; never increments hits |
 | GET | `/links/{code}` | metadata and hit count; does not increment hits |
 | DELETE | `/links/{code}` | 204; 404 if absent |
 
@@ -42,6 +44,8 @@ reserved. Omit code for a random seven-character base62 code. Generated collisio
 retry at most five times. Targets must be HTTP or HTTPS. Optional `expires_at`
 must be an aware future timestamp; a link expires at that instant, returning 410.
 Duplicate codes return 409, missing links 404, and malformed input 422.
+HEAD responses carry empty bodies with the same statuses and problem headers as
+GET and never count hits.
 Every error, including malformed bodies and validation failures, uses RFC 9457
 `application/problem+json`, and each route documents its error statuses in the
 OpenAPI schema.
@@ -109,7 +113,7 @@ shared issue/PR templates and contribution/security policies. CODEOWNERS stays l
 | --- | --- |
 | Protected PRs and Conventional Commit titles | active |
 | Shared community files and AGENTS.md glossary | active |
-| Lint, strict types, coverage and runtime dependency audit | active; 59 tests (plus generated property and schema cases), 100% branch-aware coverage |
+| Lint, strict types, coverage and runtime dependency audit | active; CI enforces at least 90% branch-aware coverage |
 | Terraform-managed settings | initial protection/security gates applied; HCP migration and scheduled drift pending |
 | Sonar analysis | owner sign-up and verified project settings pending |
 | CodeQL, secret scanning and workflow analysis | active |

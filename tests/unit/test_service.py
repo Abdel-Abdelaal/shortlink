@@ -172,3 +172,21 @@ def test_generated_collision_retries_are_bounded(
 def test_unknown_code_cannot_resolve(service: LinkService) -> None:
     with pytest.raises(LinkNotFoundError):
         service.resolve("missing1")
+
+
+def test_inspect_validates_expiry_without_counting_hits(
+    service: LinkService, clock: FixedClock
+) -> None:
+    expires_at = NOW + timedelta(seconds=10)
+    link = service.create(TARGET_URL, "preview1", expires_at)
+    assert service.inspect(link.code).target_url == TARGET_URL
+    with pytest.raises(LinkNotFoundError):
+        service.inspect("missing1")
+    assert service.stats(link.code).hits == 0
+    clock.current = expires_at
+    with pytest.raises(LinkExpiredError):
+        service.inspect(link.code)
+    assert service.stats(link.code).hits == 0
+    clock.current = NOW
+    service.resolve(link.code)
+    assert service.stats(link.code).hits == 1
