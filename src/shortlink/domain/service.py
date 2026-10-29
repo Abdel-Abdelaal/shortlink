@@ -71,6 +71,24 @@ class LinkService:
             return link
         raise CodeTakenError
 
+    def inspect(self, code: str) -> Link:
+        """Validate that a stored link is active without counting a redirect.
+
+        Args:
+            code: Short code to inspect.
+
+        Returns:
+            The stored link.
+
+        Raises:
+            LinkExpiredError: If the expiry boundary has been reached.
+            LinkNotFoundError: If the code has no stored link.
+        """
+        link = self._repository.get(code)
+        if link.expires_at is not None and link.expires_at <= self._clock.now():
+            raise LinkExpiredError
+        return link
+
     def resolve(self, code: str) -> Link:
         """Resolve an active link and count exactly one successful redirect.
 
@@ -84,9 +102,7 @@ class LinkService:
             LinkExpiredError: If the expiry boundary has been reached.
             LinkNotFoundError: If the code has no stored link.
         """
-        link = self._repository.get(code)
-        if link.expires_at is not None and link.expires_at <= self._clock.now():
-            raise LinkExpiredError
+        link = self.inspect(code)
         self._repository.increment_hits(code)
         return link
 

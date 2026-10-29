@@ -7,9 +7,10 @@ from typing import Any
 from fastapi import Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from shortlink.api.responses import head_response
 from shortlink.api.schemas import Problem
 from shortlink.domain.errors import (
     CodeTakenError,
@@ -40,8 +41,11 @@ PROBLEMS: dict[type[Exception], tuple[int, str, str]] = {
 
 def problem(
     request: Request, status: int, title: str, detail: str, **extra: object
-) -> JSONResponse:
-    """Build one problem response; never includes database or stack details."""
+) -> Response:
+    """Build one problem response; never includes database or stack details.
+
+    HEAD requests keep the status and problem headers but carry an empty body.
+    """
     body = Problem(
         type="about:blank",
         title=title,
@@ -50,20 +54,21 @@ def problem(
         instance=request.url.path,
         **extra,  # pyright: ignore[reportArgumentType]
     )
-    return JSONResponse(
+    response = JSONResponse(
         status_code=status,
         media_type=PROBLEM_MEDIA_TYPE,
         content=body.model_dump(exclude_none=True),
     )
+    return head_response(response) if request.method == "HEAD" else response
 
 
-async def handle_domain_error(request: Request, error: Exception) -> JSONResponse:
+async def handle_domain_error(request: Request, error: Exception) -> Response:
     """Map a domain error to its documented status."""
     status, title, detail = PROBLEMS[type(error)]
     return problem(request, status, title, detail)
 
 
-async def handle_validation_error(request: Request, error: Exception) -> JSONResponse:
+async def handle_validation_error(request: Request, error: Exception) -> Response:
     """Report malformed requests in the same problem format as domain errors."""
     details: Sequence[Any] = (
         error.errors() if isinstance(error, RequestValidationError) else []
@@ -81,11 +86,14 @@ async def handle_validation_error(request: Request, error: Exception) -> JSONRes
     )
 
 
-async def handle_http_error(request: Request, error: Exception) -> JSONResponse:
+async def handle_http_error(request: Request, error: Exception) -> Response:
     """Give framework errors (malformed body, unknown route) the same format."""
     if not isinstance(error, StarletteHTTPException):
         raise error
-    title = HTTPStatus(error.status_code).phrase
+    try:
+        title = HTTPStatus(error.status_code).phrase
+    except ValueError:
+        title = "Error"
     response = problem(request, error.status_code, title, str(error.detail))
     response.headers.update(error.headers or {})
     return response
