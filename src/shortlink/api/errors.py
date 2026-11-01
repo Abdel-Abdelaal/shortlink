@@ -63,8 +63,17 @@ def problem(
 
 
 async def handle_domain_error(request: Request, error: Exception) -> Response:
-    """Map a domain error to its documented status."""
-    status, title, detail = PROBLEMS[type(error)]
+    """Map a domain error to its documented status.
+
+    Subclasses missing from ``PROBLEMS`` get a generic 500 problem with no
+    exception details leaked.
+    """
+    mapped = PROBLEMS.get(type(error))
+    status, title, detail = (
+        mapped
+        if mapped is not None
+        else (500, "Internal error", "The server could not complete the request.")
+    )
     return problem(request, status, title, detail)
 
 
