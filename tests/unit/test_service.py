@@ -22,8 +22,10 @@ TARGET_URL = "https://example.com/target"
 @dataclass
 class FixedClock:
     current: datetime = NOW
+    reads: int = 0
 
     def now(self) -> datetime:
+        self.reads += 1
         return self.current
 
 
@@ -78,6 +80,39 @@ def test_duplicate_custom_code_does_not_overwrite(service: LinkService) -> None:
     with pytest.raises(CodeTakenError):
         service.create("https://other.example", "custom_1")
     assert service.stats("custom_1").target_url == TARGET_URL
+
+
+def test_custom_collision_fails_without_generating_a_code(
+    service: LinkService, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    service.create(TARGET_URL, "custom_1")
+    generate = Mock()
+    monkeypatch.setattr("shortlink.domain.service.generate_code", generate)
+    with pytest.raises(CodeTakenError):
+        service.create(TARGET_URL, "custom_1")
+    generate.assert_not_called()
+
+
+def test_create_reads_clock_once(
+    service: LinkService, clock: FixedClock, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    service.create(TARGET_URL, "custom_1")
+    assert clock.reads == 1
+
+    clock.reads = 0
+    generate = Mock(side_effect=["custom_1", "fresh12"])
+    monkeypatch.setattr("shortlink.domain.service.generate_code", generate)
+    assert service.create(TARGET_URL).code == "fresh12"
+    assert generate.call_count == 2
+    assert clock.reads == 1
+
+    clock.reads = 0
+    monkeypatch.setattr(
+        "shortlink.domain.service.generate_code", Mock(return_value="custom_1")
+    )
+    with pytest.raises(CodeTakenError):
+        service.create(TARGET_URL)
+    assert clock.reads == 1
 
 
 @pytest.mark.parametrize(
@@ -169,6 +204,34 @@ def test_generated_collision_retries_are_bounded(
     assert generate.call_count == MAX_CODE_ATTEMPTS
 
 
+def test_reserved_generated_code_exhaustion_is_bounded(
+    service: LinkService, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    generate = Mock(return_value="health")
+    monkeypatch.setattr("shortlink.domain.service.generate_code", generate)
+    with pytest.raises(CodeTakenError):
+        service.create(TARGET_URL)
+    assert generate.call_count == MAX_CODE_ATTEMPTS
+
+
 def test_unknown_code_cannot_resolve(service: LinkService) -> None:
     with pytest.raises(LinkNotFoundError):
         service.resolve("missing1")
+
+
+def test_inspect_validates_expiry_without_counting_hits(
+    service: LinkService, clock: FixedClock
+) -> None:
+    expires_at = NOW + timedelta(seconds=10)
+    link = service.create(TARGET_URL, "preview1", expires_at)
+    assert service.inspect(link.code).target_url == TARGET_URL
+    with pytest.raises(LinkNotFoundError):
+        service.inspect("missing1")
+    assert service.stats(link.code).hits == 0
+    clock.current = expires_at
+    with pytest.raises(LinkExpiredError):
+        service.inspect(link.code)
+    assert service.stats(link.code).hits == 0
+    clock.current = NOW
+    service.resolve(link.code)
+    assert service.stats(link.code).hits == 1

@@ -54,22 +54,36 @@ class LinkService:
             raise InvalidExpiryError
         if code is not None:
             validate_code(code)
-            link = Link(code, target_url, created_at, expires_at)
-            self._repository.add(link)
-            return link
+            return self._store(code, target_url, created_at, expires_at)
         for _ in range(MAX_CODE_ATTEMPTS):
             candidate = generate_code(self._code_length)
             try:
                 validate_code(candidate)
             except InvalidCodeError:
                 continue
-            link = Link(candidate, target_url, created_at, expires_at)
             try:
-                self._repository.add(link)
+                return self._store(candidate, target_url, created_at, expires_at)
             except CodeTakenError:
                 continue
-            return link
         raise CodeTakenError
+
+    def inspect(self, code: str) -> Link:
+        """Validate that a stored link is active without counting a redirect.
+
+        Args:
+            code: Short code to inspect.
+
+        Returns:
+            The stored link.
+
+        Raises:
+            LinkExpiredError: If the expiry boundary has been reached.
+            LinkNotFoundError: If the code has no stored link.
+        """
+        link = self._repository.get(code)
+        if link.expires_at is not None and link.expires_at <= self._clock.now():
+            raise LinkExpiredError
+        return link
 
     def resolve(self, code: str) -> Link:
         """Resolve an active link and count exactly one successful redirect.
@@ -84,9 +98,7 @@ class LinkService:
             LinkExpiredError: If the expiry boundary has been reached.
             LinkNotFoundError: If the code has no stored link.
         """
-        link = self._repository.get(code)
-        if link.expires_at is not None and link.expires_at <= self._clock.now():
-            raise LinkExpiredError
+        link = self.inspect(code)
         self._repository.increment_hits(code)
         return link
 
@@ -97,3 +109,15 @@ class LinkService:
     def delete(self, code: str) -> None:
         """Delete a stored link or raise LinkNotFoundError."""
         self._repository.delete(code)
+
+    def _store(
+        self,
+        code: str,
+        target_url: str,
+        created_at: datetime,
+        expires_at: datetime | None,
+    ) -> Link:
+        """Construct a link and persist it through the repository port."""
+        link = Link(code, target_url, created_at, expires_at)
+        self._repository.add(link)
+        return link

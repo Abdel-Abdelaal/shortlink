@@ -29,10 +29,20 @@ Never commit `.env` or the SQLite database.
 | Method | Path | Result |
 | --- | --- | --- |
 | GET | `/health` | liveness JSON |
+| HEAD | `/health` | 200, empty body; content type matches GET |
 | POST | `/links` | 201 with code, short URL, metadata and Location |
 | GET | `/{code}` | 307 redirect; increments hits once |
+| HEAD | `/{code}` | 307, same Location as GET; never increments hits |
 | GET | `/links/{code}` | metadata and hit count; does not increment hits |
 | DELETE | `/links/{code}` | 204; 404 if absent |
+
+```sh
+curl http://127.0.0.1:8000/health
+```
+
+```json
+{"status": "ok"}
+```
 
 ```sh
 curl -X POST http://127.0.0.1:8000/links \
@@ -48,6 +58,8 @@ reserved. Omit code for a random seven-character base62 code. Generated collisio
 retry at most five times. Targets must be HTTP or HTTPS. Optional `expires_at`
 must be an aware future timestamp; a link expires at that instant, returning 410.
 Duplicate codes return 409, missing links 404, and malformed input 422.
+HEAD responses carry empty bodies with the same statuses and problem headers as
+GET and never count hits.
 Every error, including malformed bodies and validation failures, uses RFC 9457
 `application/problem+json`, and each route documents its error statuses in the
 OpenAPI schema.
@@ -115,7 +127,7 @@ shared issue/PR templates and contribution/security policies. CODEOWNERS stays l
 | --- | --- |
 | Protected PRs and Conventional Commit titles | active |
 | Shared community files and AGENTS.md glossary | active |
-| Lint, strict types, coverage and runtime dependency audit | active; 59 tests (plus generated property and schema cases), 100% branch-aware coverage |
+| Lint, strict types, coverage and runtime dependency audit | active; CI enforces at least 90% branch-aware coverage |
 | Terraform-managed settings | initial protection/security gates applied; HCP migration and scheduled drift pending |
 | Sonar analysis | owner sign-up and verified project settings pending |
 | CodeQL, secret scanning and workflow analysis | active |
@@ -160,7 +172,7 @@ only after the automation App is configured; otherwise that step skips explicitl
 No AI check is required for merging, and no AI workflow can merge or approve.
 See [the isolation design](https://github.com/Abdel-Abdelaal/platform-workflows/blob/main/docs/ai.md).
 
-Maintenance callers now pin platform v1.9.1 (`7b7bea4e50c6ee1b1dcf0d318e4504655678b0b8`).
+Maintenance callers now pin platform v1.12.0 (`aa42de723a82473499d8744c37ed4e571c868354`).
 Signed AI evidence and measured runs appear in the
 [public AI observatory](https://abdel-abdelaal.github.io/github-governance/). Frozen hook checks
 run where a hook configuration is supported; native Dependabot maintains baseline
