@@ -1,0 +1,2 @@
+# Use the same project rules in Super-linter and native Python CI.
+extend = "../../pyproject.toml"
