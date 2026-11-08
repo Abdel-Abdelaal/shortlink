@@ -18,6 +18,12 @@ Settings use `SHORTLINK_` environment variables; copy `.env.example` to `.env` f
 local overrides. The database is created at startup, not when Python imports a module.
 Never commit `.env` or the SQLite database.
 
+| Variable | Default | Allowed |
+| --- | --- | --- |
+| `SHORTLINK_DATABASE_PATH` | `shortlink.db` | any filesystem path |
+| `SHORTLINK_BASE_URL` | `http://127.0.0.1:8000` | valid HTTP or HTTPS URL |
+| `SHORTLINK_CODE_LENGTH` | `7` | integer 4-32 |
+
 ## API
 
 | Method | Path | Result |
